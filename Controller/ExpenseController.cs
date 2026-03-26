@@ -1,35 +1,76 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using ExpenseTracker.Api.Data;
 using ExpenseTracker.Api.Models;
 
 namespace ExpenseTracker.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")] // Ye route banayega: api/Expense
+    [Route("api/[controller]")]
     public class ExpenseController : ControllerBase
     {
-        // Static list as a temporary database
-        private static readonly List<Expense> Expenses = new List<Expense>
+        private readonly ApplicationDbContext _context;
+       
+        public ExpenseController(ApplicationDbContext context)
         {
-            new Expense { Id = 1, Title = "Azure Subscription", Amount = 1500, Category = "Cloud", Date = DateTime.Now.AddDays(-2) },
-            new Expense { Id = 2, Title = "Broadband Bill", Amount = 999, Category = "Utilities", Date = DateTime.Now.AddDays(-1) }
-        };
+            _context = context;
+        }
 
         // GET: api/Expense
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            return Ok(Expenses);
+            var expenses = await _context.Expenses.ToListAsync();
+            return Ok(expenses);
         }
 
         // POST: api/Expense
         [HttpPost]
-        public IActionResult Create(Expense newExpense)
+        public async Task<IActionResult> Create(Expense newExpense)
         {
-            newExpense.Id = Expenses.Count > 0 ? Expenses.Max(e => e.Id) + 1 : 1;
-            Expenses.Add(newExpense);
+            _context.Expenses.Add(newExpense);
+            await _context.SaveChangesAsync();
             
-            // Returns 201 Created status
             return CreatedAtAction(nameof(GetAll), new { id = newExpense.Id }, newExpense);
+        }
+
+        // PUT: api/Expense/5 (Update karne ke liye)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, Expense updatedExpense)
+        {
+            if (id != updatedExpense.Id)
+            {
+                return BadRequest("URL ka ID aur Data ka ID match nahi ho raha.");
+            }
+
+            var expense = await _context.Expenses.FindAsync(id);
+            if (expense == null)
+            {
+                return NotFound("Ye Expense database mein nahi mila.");
+            }
+
+            // Purane data ko naye data se replace kar rahe hain
+            expense.Title = updatedExpense.Title;
+            expense.Amount = updatedExpense.Amount;
+            expense.Date = updatedExpense.Date;
+
+            await _context.SaveChangesAsync();
+            return NoContent(); // Success (204 No Content)
+        }
+
+        // DELETE: api/Expense/5 (Delete karne ke liye)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var expense = await _context.Expenses.FindAsync(id);
+            if (expense == null)
+            {
+                return NotFound("Ye Expense pehle se hi delete ho chuka hai ya exist nahi karta.");
+            }
+
+            _context.Expenses.Remove(expense);
+            await _context.SaveChangesAsync();
+            return NoContent(); // Success (204 No Content)
         }
     }
 }
