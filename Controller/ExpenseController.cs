@@ -16,7 +16,6 @@ namespace ExpenseTracker.Api.Controllers
             _context = context;
         }
 
-        // GET: api/Expense
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -24,7 +23,6 @@ namespace ExpenseTracker.Api.Controllers
             return Ok(expenses);
         }
 
-        // POST: api/Expense
         [HttpPost]
         public async Task<IActionResult> Create(Expense newExpense)
         {
@@ -33,8 +31,7 @@ namespace ExpenseTracker.Api.Controllers
             
             return CreatedAtAction(nameof(GetAll), new { id = newExpense.Id }, newExpense);
         }
-
-        // PUT: api/Expense/5 (Update karne ke liye)
+      
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, Expense updatedExpense)
         {
@@ -49,16 +46,14 @@ namespace ExpenseTracker.Api.Controllers
                 return NotFound("Ye Expense database mein nahi mila.");
             }
 
-            // Purane data ko naye data se replace kar rahe hain
-            expense.Title = updatedExpense.Title;
+             expense.Title = updatedExpense.Title;
             expense.Amount = updatedExpense.Amount;
             expense.Date = updatedExpense.Date;
 
             await _context.SaveChangesAsync();
-            return NoContent(); // Success (204 No Content)
+            return NoContent(); 
         }
 
-        // DELETE: api/Expense/5 (Delete karne ke liye)
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -70,7 +65,7 @@ namespace ExpenseTracker.Api.Controllers
 
             _context.Expenses.Remove(expense);
             await _context.SaveChangesAsync();
-            return NoContent(); // Success (204 No Content)
+            return NoContent(); 
         }
     }
 }

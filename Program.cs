@@ -21,7 +21,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// 2. YE LINE ADD KI HAI
 app.MapControllers(); 
 
 app.Run();
