@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ExpenseTracker.Api.Data;
 using ExpenseTracker.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ExpenseTracker.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] // This locks all endpoints in this controller
     public class ExpenseController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
